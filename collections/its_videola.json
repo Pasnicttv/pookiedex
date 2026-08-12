@@ -1,0 +1,30 @@
+{
+  "user": "its_videola",
+  "cards": [
+    {
+      "cardId": "pookie_002",
+      "quantity": 4,
+      "obtainedAt": 1786498251
+    },
+    {
+      "cardId": "pookie_003",
+      "quantity": 3,
+      "obtainedAt": 1786498251
+    },
+    {
+      "cardId": "pookie_004",
+      "quantity": 2,
+      "obtainedAt": 1786498419
+    },
+    {
+      "cardId": "pookie_001",
+      "quantity": 4,
+      "obtainedAt": 1786498420
+    },
+    {
+      "cardId": "pookie_006",
+      "quantity": 1,
+      "obtainedAt": 1786501622
+    }
+  ]
+}
