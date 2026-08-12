@@ -1,0 +1,40 @@
+{
+  "user": "guriosam",
+  "cards": [
+    {
+      "cardId": "pookie_002",
+      "quantity": 2,
+      "obtainedAt": 1786501667
+    },
+    {
+      "cardId": "pookie_004",
+      "quantity": 7,
+      "obtainedAt": 1786501667
+    },
+    {
+      "cardId": "pookie_001",
+      "quantity": 3,
+      "obtainedAt": 1786501667
+    },
+    {
+      "cardId": "pookie_006",
+      "quantity": 3,
+      "obtainedAt": 1786501710
+    },
+    {
+      "cardId": "pookie_003",
+      "quantity": 2,
+      "obtainedAt": 1786501710
+    },
+    {
+      "cardId": "pookie_005",
+      "quantity": 2,
+      "obtainedAt": 1786501713
+    },
+    {
+      "cardId": "pookie_009",
+      "quantity": 1,
+      "obtainedAt": 1786501717
+    }
+  ]
+}
