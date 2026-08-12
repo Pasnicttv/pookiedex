@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pookiemon Collection</title>
+<style>
+  :root{
+    --bg:#0f1020; --panel:#1a1c33; --panel2:#23264a; --text:#e9e9f2;
+    --muted:#8b8fb5; --line:#2e315a; --accent:#7c5cff;
+    --r1:#9aa0b5; --r2:#4ea1ff; --r3:#37d67a; --r4:#ffb020; --r5:#ff6b6b;
+    --ur:#33e0e0; --sur:#b06bff; --epic:#c04bff; --leg:#ffd23f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:
+     radial-gradient(1200px 600px at 50% -10%, #1c1f42 0%, var(--bg) 60%);
+     color:var(--text);min-height:100vh}
+  header{padding:24px 20px 8px;max-width:1100px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:1.6rem;letter-spacing:.5px}
+  .sub{color:var(--muted);font-size:.9rem}
+  .searchbar{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
+  .searchbar input{flex:1;min-width:180px;padding:11px 14px;border-radius:10px;
+     border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:1rem}
+  .searchbar button{padding:11px 18px;border:0;border-radius:10px;background:var(--accent);
+     color:#fff;font-weight:600;cursor:pointer;font-size:1rem}
+  .searchbar button:hover{filter:brightness(1.1)}
+  .stats{max-width:1100px;margin:0 auto;padding:0 20px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;
+     padding:8px 14px;font-size:.9rem}
+  .pill b{color:#fff}
+  .bar{flex:1;min-width:160px;height:12px;background:var(--panel);border-radius:999px;
+     overflow:hidden;border:1px solid var(--line)}
+  .bar > div{height:100%;background:linear-gradient(90deg,var(--accent),#37d67a);width:0}
+  .filters{max-width:1100px;margin:16px auto 0;padding:0 20px;display:flex;gap:8px;flex-wrap:wrap}
+  .chip{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel);
+     color:var(--muted);cursor:pointer;font-size:.85rem;user-select:none}
+  .chip.active{background:var(--panel2);color:#fff;border-color:var(--accent)}
+  .grid{max-width:1100px;margin:18px auto 60px;padding:0 20px;
+     display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+     position:relative;transition:transform .12s}
+  .card:hover{transform:translateY(-3px)}
+  .card.owned{border-color:var(--accent)}
+  .card .img{aspect-ratio:3/4;background:var(--panel2);display:flex;align-items:center;
+     justify-content:center;font-size:2.4rem;color:var(--muted);overflow:hidden}
+  .card .img img{width:100%;height:100%;object-fit:cover}
+  .card.missing .img{filter:grayscale(1) brightness(.35)}
+  .card .body{padding:8px 10px}
+  .card .name{font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card.missing .name{color:var(--muted)}
+  .card .rar{font-size:.75rem;color:var(--muted);margin-top:2px}
+  .qty{position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;
+     border-radius:999px;padding:2px 8px;font-size:.75rem;font-weight:700}
+  .rar-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .msg{max-width:1100px;margin:40px auto;padding:0 20px;color:var(--muted);text-align:center}
+  .credit{text-align:center;color:var(--muted);font-size:.75rem;padding:20px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎴 Pookiemon Collection</h1>
+  <div class="sub">Type a Twitch username to see their cards.</div>
+  <div class="searchbar">
+    <input id="userInput" placeholder="twitch username" autocomplete="off">
+    <button id="goBtn">View</button>
+  </div>
+</header>
+
+<div class="stats" id="stats" style="display:none">
+  <div class="pill">👤 <b id="who">—</b></div>
+  <div class="pill"><b id="pct">0%</b> complete</div>
+  <div class="pill"><b id="uniq">0</b>/<span id="total">0</span> cards</div>
+  <div class="bar"><div id="barFill"></div></div>
+</div>
+
+<div class="filters" id="filters" style="display:none"></div>
+<div class="grid" id="grid"></div>
+<div class="msg" id="msg"></div>
+<div class="credit">Pookiemon TCG</div>
+
+<script>
+// ================= CONFIG =================
+// Where the data lives, RELATIVE to this html file.
+const CARDS_URL   = "cards.json";                 // the card catalog
+const COLLECTION  = (u) => "collections/" + u + ".json";  // per-user file
+// Prefix for card images. If your cards.json image is already a full URL, leave "".
+// e.g. IMAGE_BASE = "images/"   ->   images/bulbandit.png
+const IMAGE_BASE  = "images/";
+// =========================================
+
+const RAR = {
+  "1star":{label:"⭐",color:"var(--r1)",order:1},
+  "2star":{label:"⭐⭐",color:"var(--r2)",order:2},
+  "3star":{label:"⭐⭐⭐",color:"var(--r3)",order:3},
+  "4star":{label:"⭐⭐⭐⭐",color:"var(--r4)",order:4},
+  "5star":{label:"⭐⭐⭐⭐⭐",color:"var(--r5)",order:5},
+  "ultra_rare":{label:"💎 Ultra",color:"var(--ur)",order:6},
+  "super_ultra_rare":{label:"🌌 Super Ultra",color:"var(--sur)",order:7},
+  "epic":{label:"🔮 Epic",color:"var(--epic)",order:8},
+  "legendary":{label:"👑 Legendary",color:"var(--leg)",order:9}
+};
+
+let allCards = [];
+let owned = {};        // cardId -> quantity
+let activeRarity = "all";
+
+const $ = (id) => document.getElementById(id);
+
+function imgUrl(card){
+  if(!card.image) return "";
+  if(/^https?:\/\//i.test(card.image)) return card.image;
+  return IMAGE_BASE + card.image;
+}
+
+async function loadCatalog(){
+  if(allCards.length) return;
+  const res = await fetch(CARDS_URL, {cache:"no-store"});
+  if(!res.ok) throw new Error("cards.json not found");
+  const data = await res.json();
+  allCards = (data.cards || []).slice();
+  allCards.sort((a,b)=>{
+    const ra=(RAR[a.rarity]||{order:99}).order, rb=(RAR[b.rarity]||{order:99}).order;
+    if(ra!==rb) return ra-rb;
+    return (a.name||"").localeCompare(b.name||"");
+  });
+}
+
+async function loadUser(user){
+  owned = {};
+  try{
+    const res = await fetch(COLLECTION(user), {cache:"no-store"});
+    if(res.ok){
+      const col = await res.json();
+      (col.cards||[]).forEach(e=>{ if(e.quantity>0) owned[e.cardId]=e.quantity; });
+    }
+  }catch(e){ /* no collection = empty */ }
+}
+
+function buildFilters(){
+  const present = {};
+  allCards.forEach(c=>present[c.rarity]=true);
+  const keys = Object.keys(RAR).filter(k=>present[k]);
+  const f = $("filters");
+  f.innerHTML = "";
+  const mk=(key,text)=>{
+    const el=document.createElement("div");
+    el.className="chip"+(activeRarity===key?" active":"");
+    el.textContent=text;
+    el.onclick=()=>{activeRarity=key;render();buildFilters();};
+    f.appendChild(el);
+  };
+  mk("all","All");
+  keys.forEach(k=>mk(k,(RAR[k].label)));
+  f.style.display="flex";
+}
+
+function render(){
+  const grid=$("grid");
+  grid.innerHTML="";
+  let total=0, uniq=0;
+  allCards.forEach(c=>{
+    total++;
+    const have = owned[c.id]||0;
+    if(have>0) uniq++;
+    if(activeRarity!=="all" && c.rarity!==activeRarity) return;
+
+    const info = RAR[c.rarity]||{label:c.rarity,color:"var(--muted)"};
+    const card=document.createElement("div");
+    card.className="card "+(have>0?"owned":"missing");
+    const url=imgUrl(c);
+    card.innerHTML=`
+      <div class="img">${url?`<img src="${url}" alt="" onerror="this.style.display='none';this.parentNode.innerHTML='❔'">`:"❔"}</div>
+      ${have>0?`<div class="qty">x${have}</div>`:""}
+      <div class="body">
+        <div class="name">${have>0?c.name:"???"}</div>
+        <div class="rar"><span class="rar-dot" style="background:${info.color}"></span>${info.label}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  const pct = total>0 ? Math.round(100*uniq/total) : 0;
+  $("pct").textContent=pct+"%";
+  $("uniq").textContent=uniq;
+  $("total").textContent=total;
+  $("barFill").style.width=pct+"%";
+}
+
+async function view(user){
+  user=(user||"").trim().toLowerCase();
+  if(!user){ return; }
+  $("msg").textContent="Loading…";
+  try{
+    await loadCatalog();
+    await loadUser(user);
+    $("who").textContent=user;
+    $("stats").style.display="flex";
+    buildFilters();
+    render();
+    $("msg").textContent="";
+    history.replaceState(null,"","?user="+encodeURIComponent(user));
+  }catch(err){
+    $("msg").textContent="Couldn't load data: "+err.message;
+  }
+}
+
+$("goBtn").onclick=()=>view($("userInput").value);
+$("userInput").addEventListener("keydown",e=>{ if(e.key==="Enter") view($("userInput").value); });
+
+// Auto-load from ?user= in the URL
+const params=new URLSearchParams(location.search);
+const initUser=params.get("user");
+if(initUser){ $("userInput").value=initUser; view(initUser); }
+</script>
+</body>
+</html>
