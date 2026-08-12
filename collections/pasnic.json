@@ -1,0 +1,35 @@
+{
+  "user": "pasnic",
+  "cards": [
+    {
+      "cardId": "pookie_001",
+      "quantity": 11,
+      "obtainedAt": 1234567890
+    },
+    {
+      "cardId": "pookie_006",
+      "quantity": 2,
+      "obtainedAt": 1234567891
+    },
+    {
+      "cardId": "pookie_003",
+      "quantity": 6,
+      "obtainedAt": 1786496657
+    },
+    {
+      "cardId": "pookie_004",
+      "quantity": 3,
+      "obtainedAt": 1786496657
+    },
+    {
+      "cardId": "pookie_005",
+      "quantity": 4,
+      "obtainedAt": 1786496802
+    },
+    {
+      "cardId": "pookie_002",
+      "quantity": 2,
+      "obtainedAt": 1786498884
+    }
+  ]
+}
