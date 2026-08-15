@@ -3,7 +3,7 @@
   "cards": [
     {
       "cardId": "pookie_001",
-      "quantity": 12,
+      "quantity": 14,
       "obtainedAt": 1234567890
     },
     {
@@ -18,7 +18,7 @@
     },
     {
       "cardId": "pookie_004",
-      "quantity": 4,
+      "quantity": 5,
       "obtainedAt": 1786496657
     },
     {
